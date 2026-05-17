@@ -1,9 +1,12 @@
 import sys
 from pathlib import Path
-
-import streamlit as st
+from dataclasses import asdict
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from app.retrieval.service import MovieRetrievalService
+import streamlit as st
+
 
 from app.conversation.manager import ConversationManager
 from app.conversation.state import ConversationState
@@ -22,7 +25,7 @@ manager = ConversationManager()
 
 user_input = st.text_area(
     "Your input",
-    placeholder="I want to watch an action movie with friends tomorrow night under 1000 rupees in Bangalore.",
+    placeholder="I want to watch __ movie (both category and name are fine) with __ / alone tomorrow night under x rupees in location.",
     height=120,
 )
 
@@ -76,3 +79,42 @@ st.write(next_question)
 
 st.subheader("Conversation History")
 st.json(st.session_state.conversation.history)
+
+retrieval_service = MovieRetrievalService()
+
+st.subheader("Retrieve Movie Candidates")
+retrieve_clicked = st.button("Retrieve Candidates")
+
+if retrieve_clicked:
+    try:
+        retrieval_result = retrieval_service.retrieve(
+            st.session_state.conversation.preferences
+        )
+
+        st.subheader("Retrieval Query")
+        st.json(asdict(retrieval_result.query))
+
+        st.subheader("Source Notes")
+        st.write(retrieval_result.source_notes)
+
+        st.subheader("Retrieval Metadata")
+
+        st.json({
+            "retrieval_strategy":
+                retrieval_result.metadata.retrieval_strategy,
+
+            "candidate_count":
+                retrieval_result.metadata.candidate_count,
+
+            "selected_movie_title":
+                retrieval_result.metadata.selected_movie_title,
+        })
+
+        st.subheader("Candidates")
+        st.json([asdict(candidate) for candidate in retrieval_result.candidates])
+
+    except Exception as exc:
+        st.error(str(exc))
+
+st.subheader("Selected Movie Title")
+st.write(st.session_state.conversation.preferences.selected_movie_title)

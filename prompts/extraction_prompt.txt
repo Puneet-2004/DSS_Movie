@@ -19,12 +19,14 @@ Use this schema:
   "preferred_time_range": string or null,
   "wants_food": boolean or null,
   "preferred_formats": [],
-  "flexibility_level": string or null
+  "flexibility_level": string or null,
+  "selected_movie_title": string or null
 }
 
 Rules:
 - If a scalar value is missing, use null.
 - If a list value is missing, use [].
+- If the user explicitly names a movie they want to watch, populate selected_movie_title.
 - Never invent information.
 - Never include markdown.
 - Never include code fences.

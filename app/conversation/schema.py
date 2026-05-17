@@ -20,6 +20,7 @@ class UserPreferences(BaseModel):
     preferred_formats: Optional[List[str]] = Field(default_factory=list)
 
     flexibility_level: Optional[str] = None
+    selected_movie_title: Optional[str] = None
 
     def merge_with(self, other: "UserPreferences") -> "UserPreferences":
         current = self.model_dump()
